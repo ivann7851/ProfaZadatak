@@ -17,5 +17,5 @@ stsl2024
 ! edit uređivanje bilješki od učenika
 ! na dodaj učenika - id skolske godiine neka pise koja je godina
 ! ime oca i majke nadodati na tablicu od ucenika 
-! dodaj obavijest da je dodan ucenika
+! dodaj obavijest da je dodan ucenika..
 
