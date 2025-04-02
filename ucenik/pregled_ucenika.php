@@ -4,6 +4,19 @@
 <title>Pregled ucenika</title>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1250" />
 <link rel="stylesheet" type="text/css" href="../admin_css.css" />
+<style>
+	#button{
+	background-color: #007bff;
+    color: #fff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s ease;
+	margin-right: 21.9cm;
+	}
+</style>
 </head>
 <body>
 <div class="sve">
@@ -67,6 +80,7 @@
 	Opis: 
 	<textarea rows="4" cols="50" name="dosje_opis"></textarea><br />
 	Datum unosa: <input type="date" name="datum_unosa_dosjea" value="<?php echo date('Y-m-d'); ?>" /><br />
+	<input type="button" value="Priloži dokument" name="dodaj_dokument" id="button">
 	<input type="submit" name="dodaj_dosje" value="Dodaj dosje"/>
 </form>
 

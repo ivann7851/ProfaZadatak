@@ -19,3 +19,9 @@ stsl2024
 ! ime oca i majke nadodati na tablicu od ucenika 
 ! dodaj obavijest da je dodan ucenika..
 
+
+// botun za dodat file,
+ uhvatit id i povezat s slikom, 
+ baza veza vise na vise, 1:n, dodat dokument i pregled dokumenata,
+  folder dokumenti od zadnji put, u file baza dodat i tablice,
+   kako spojit tablice? 
