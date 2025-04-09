@@ -80,7 +80,10 @@
 	Opis: 
 	<textarea rows="4" cols="50" name="dosje_opis"></textarea><br />
 	Datum unosa: <input type="date" name="datum_unosa_dosjea" value="<?php echo date('Y-m-d'); ?>" /><br />
-	<input type="button" value="Priloži dokument" name="dodaj_dokument" id="button">
+	<input type="file" id="fileToUpload" name="fileToUpload" onchange="previewImage()">
+	<div id="imagePreview" style="margin-top:10px;"></div>
+	<input type="hidden" name="temp_file_name" id="temp_file_name">
+	<input type="button" value="Priloži dokument" name="dodaj_dokument" id="button" onclick="uploadFile()">
 	<input type="submit" name="dodaj_dosje" value="Dodaj dosje"/>
 </form>
 
@@ -93,21 +96,94 @@
 			$dosje_opis = mysqli_real_escape_string($conn, $_POST['dosje_opis']);
 			$datum_unosa_dosjea = mysqli_real_escape_string($conn, $_POST['datum_unosa_dosjea']);
 		
-			$query = "INSERT INTO stsl_dosje_ucenika (id_uc, id_ko, opis, datum_unosa) VALUES ('$id_ucenika', '$id_korisnika', '$dosje_opis', '$datum_unosa_dosjea')";
-		
+			$query = "INSERT INTO stsl_dosje_ucenika (id_uc, id_ko, opis, datum_unosa)
+					  VALUES ('$id_ucenika', '$id_korisnika', '$dosje_opis', '$datum_unosa_dosjea')";
+			
 			if (mysqli_query($conn, $query)) {
-				echo "Uspješno uneseno!<br /><br />";
+				// Spremanje dokumenta iz temp u uploads samo ako postoji
+				if (!empty($_POST['temp_file_name'])) {
+					$tempFile = '../temp/' . basename($_POST['temp_file_name']);
+					$uploadDir = './uploads/';
+					
+					// Provjeri postoji li temp datoteka
+					if (file_exists($tempFile)) {
+						if (!is_dir($uploadDir)) {
+							mkdir($uploadDir, 0777, true);
+						}
+						
+						$finalFile = $uploadDir . basename($_POST['temp_file_name']);
+						
+						if (rename($tempFile, $finalFile)) {
+							$nazivDokumenta = mysqli_real_escape_string($conn, $_POST['temp_file_name']);
+							$putanja = mysqli_real_escape_string($conn, $finalFile);
+							
+							// Unos podataka o dokumentu u bazu
+							$queryDok = "INSERT INTO stsl_dokumenti (id_uc, naziv_dokumenta, putanja) 
+										VALUES ('$id_ucenika', '$nazivDokumenta', '$putanja')";
+							mysqli_query($conn, $queryDok);
+							
+							echo "✅ Dokument uspješno prenesen u uploads folder.<br>";
+						} else {
+							echo "❌ Greška pri premještanju datoteke!<br>";
+							error_log("Greška pri premještanju: " . print_r(error_get_last(), true));
+						}
+					} else {
+						echo "⚠️ Temp datoteka nije pronađena!<br>";
+					}
+				}
+		
+				echo "✅ Dosje uspješno dodan.<br>";
 				header("Location: " . $_SERVER['PHP_SELF'] . "?id_ucenika=" . $id_ucenika);
 				exit;
 			} else {
-				echo "Nije uneseno!<br /><br />";
+				echo "❌ Greška pri unosu dosjea!<br>";
 			}
 			mysqli_close($conn);
+
 		}
 	}
     ?>
 
 </div>
+	<script>
+let tempFileName = '';
+
+function uploadFile() {
+    const input = document.getElementById('fileToUpload');
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('filetoupload', file);
+
+    fetch('upload_temp.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert("✅ Dokument privremeno spremljen.");
+            document.getElementById('temp_file_name').value = data.file;
+            tempFileName = data.file;
+        } else {
+            alert("❌ " + data.msg);
+        }
+    });
+}
+
+function previewImage() {
+    const input = document.getElementById('fileToUpload');
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imageUrl = e.target.result;
+            document.getElementById('imagePreview').innerHTML = `<img src="${imageUrl}" alt="Pregled slike" width="150">`;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+
 </body>
 </html>
 
